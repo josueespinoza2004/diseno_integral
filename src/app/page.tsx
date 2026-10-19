@@ -15,10 +15,11 @@ import { OrderTrackingView } from '@/components/views/OrderTrackingView';
 import { AdminProductsView } from '@/components/views/AdminProductsView';
 import { AdminOrdersView } from '@/components/views/AdminOrdersView';
 import { ViewType } from '@/types';
-import { Sparkles, FileText, ChevronRight, HelpCircle } from 'lucide-react';
+import { Sparkles, FileText, Package, Lock, ShieldCheck } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 function AppContent() {
-  const { currentView, setCurrentView, setSpecDrawerOpen } = useStore();
+  const { currentView, setCurrentView, setSpecDrawerOpen, currentUser } = useStore();
 
   const renderActiveView = () => {
     switch (currentView) {
@@ -44,7 +45,6 @@ function AppContent() {
   };
 
   const quickScreens: { id: ViewType; label: string; num: string }[] = [
-    { id: 'login', num: '1', label: 'Inicio de Sesión' },
     { id: 'catalog', num: '2', label: 'Catálogo' },
     { id: 'product-detail', num: '3', label: 'Detalle' },
     { id: 'cart', num: '4', label: 'Carrito' },
@@ -54,16 +54,77 @@ function AppContent() {
     { id: 'admin-orders', num: '8', label: 'Admin Pedidos' },
   ];
 
+  // SCENARIO 1: Unauthenticated User (Standalone Login Screen)
+  if (!currentUser) {
+    return (
+      <div className="min-h-screen flex flex-col bg-slate-100/90 text-slate-900 selection:bg-indigo-500 selection:text-white">
+        {/* Minimal Auth Header */}
+        <header className="bg-slate-900 text-white px-4 sm:px-6 py-3 border-b border-slate-800">
+          <div className="max-w-7xl mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-md">
+                <Package className="w-5 h-5" />
+              </div>
+              <div>
+                <span className="font-extrabold text-base tracking-tight text-white">
+                  Nova<span className="text-indigo-400">Store</span>
+                </span>
+                <span className="hidden sm:inline-block ml-2 text-xs text-slate-400 border-l border-slate-700 pl-2">
+                  Control Integral de Pedidos
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <span className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 text-xs border border-slate-700">
+                <Lock className="w-3.5 h-3.5 text-amber-400" />
+                <span>Portal Protegido</span>
+              </span>
+
+              {/* Ficha Técnica button available even before logging in for review */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSpecDrawerOpen(true)}
+                className="bg-indigo-950/80 hover:bg-indigo-900 text-indigo-200 border-indigo-700/60 text-xs h-8 gap-1.5"
+              >
+                <FileText className="w-3.5 h-3.5 text-indigo-300" />
+                <span>Ficha Técnica</span>
+              </Button>
+            </div>
+          </div>
+        </header>
+
+        {/* Dedicated Login Main View */}
+        <main className="flex-1 flex items-center justify-center py-8">
+          <LoginView />
+        </main>
+
+        {/* Minimal Auth Footer */}
+        <footer className="bg-slate-900 text-slate-400 text-xs py-4 px-6 border-t border-slate-800 text-center">
+          <p>
+            © 2026 NovaStore • Inicia sesión con los <strong>usuarios quemados</strong> o regístrate para desbloquear la tienda y el panel de administración.
+          </p>
+        </footer>
+
+        {/* Spec Drawer & Toasts */}
+        <SpecDrawer />
+        <ToastContainer />
+      </div>
+    );
+  }
+
+  // SCENARIO 2: Authenticated User (Full Store / Admin Dashboard)
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 selection:bg-indigo-500 selection:text-white">
-      {/* Global Navigation Header */}
+      {/* Global Navigation Header with Role & Profile */}
       <Header />
 
-      {/* Screen Quick Breadcrumb Navigator for Reviewing */}
+      {/* Screen Quick Breadcrumb Navigator for Authenticated User */}
       <div className="bg-slate-100/90 border-b border-slate-200/80 px-4 py-2">
         <div className="max-w-7xl mx-auto flex items-center justify-between text-xs overflow-x-auto scrollbar-none gap-2">
           <div className="flex items-center gap-1.5 shrink-0 text-slate-500 font-medium">
-            <span className="hidden sm:inline">Navegación Rápida de Pantallas:</span>
+            <span className="hidden sm:inline">Navegación Rápida:</span>
           </div>
 
           <div className="flex items-center gap-1 shrink-0">
@@ -102,7 +163,7 @@ function AppContent() {
         </div>
       </div>
 
-      {/* Main View Display */}
+      {/* Main Active Screen */}
       <main className="flex-1 w-full animate-in fade-in duration-200">
         {renderActiveView()}
       </main>

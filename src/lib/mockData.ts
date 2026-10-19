@@ -17,6 +17,28 @@ export const initialUsers: User[] = [
   },
 ];
 
+export interface MockCredential {
+  email: string;
+  password: string;
+  role: 'cliente' | 'admin';
+  user: User;
+}
+
+export const mockCredentials: MockCredential[] = [
+  {
+    email: 'maria.gonzalez@example.com',
+    password: 'cliente123',
+    role: 'cliente',
+    user: initialUsers[0],
+  },
+  {
+    email: 'admin@tienda.com',
+    password: 'admin123',
+    role: 'admin',
+    user: initialUsers[1],
+  },
+];
+
 export const initialProducts: Product[] = [
   {
     id: 'prod-001',

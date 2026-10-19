@@ -11,7 +11,7 @@ import {
   OrderStatus,
   OrderTimelineEvent
 } from '@/types';
-import { initialProducts, initialOrders, initialUsers } from '@/lib/mockData';
+import { initialProducts, initialOrders, initialUsers, mockCredentials, MockCredential } from '@/lib/mockData';
 
 interface ToastMessage {
   id: string;
@@ -29,7 +29,10 @@ interface StoreContextType {
 
   // Authentication
   currentUser: User | null;
+  isAuthenticated: boolean;
   userRole: UserRole;
+  loginWithCredentials: (email: string, password: string) => { success: boolean; message: string };
+  registerUser: (data: { name: string; email: string; phone: string; password: string }) => { success: boolean; message: string };
   loginAs: (role: UserRole) => void;
   logout: () => void;
 
@@ -85,13 +88,30 @@ interface StoreContextType {
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
 export function StoreProvider({ children }: { children: React.ReactNode }) {
-  // Navigation State
-  const [currentView, setCurrentView] = useState<ViewType>('catalog');
+  // Navigation State - starts on login
+  const [currentView, setCurrentViewState] = useState<ViewType>('login');
   const [specDrawerOpen, setSpecDrawerOpen] = useState<boolean>(false);
 
-  // Auth State
-  const [currentUser, setCurrentUser] = useState<User | null>(initialUsers[0]); // Starts as client Maria
+  // Auth State - starts unauthenticated
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [userRole, setUserRole] = useState<UserRole>('cliente');
+  const [userCredentials, setUserCredentials] = useState<MockCredential[]>(mockCredentials);
+
+  const isAuthenticated = currentUser !== null;
+
+  // Protected View Navigation
+  const setCurrentView = (view: ViewType) => {
+    if (!currentUser && view !== 'login') {
+      showToast(
+        'warning',
+        'Acceso Restringido',
+        'Debes iniciar sesión con tus credenciales para acceder a las pantallas del sistema.'
+      );
+      setCurrentViewState('login');
+      return;
+    }
+    setCurrentViewState(view);
+  };
 
   // Products State
   const [products, setProducts] = useState<Product[]>(initialProducts);
@@ -124,27 +144,85 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
-  // Auth Handlers
+  // Auth Handlers with Burned Credentials Validation
+  const loginWithCredentials = (email: string, password: string): { success: boolean; message: string } => {
+    const found = userCredentials.find(
+      (c) => c.email.toLowerCase() === email.trim().toLowerCase() && c.password === password
+    );
+
+    if (!found) {
+      const msg = 'Credenciales no válidas. Comprueba el correo y la contraseña ingresada.';
+      showToast('error', 'Error de Acceso', msg);
+      return { success: false, message: msg };
+    }
+
+    setCurrentUser(found.user);
+    setUserRole(found.role);
+    showToast(
+      'success',
+      '¡Sesión Iniciada!',
+      `Has ingresado como ${found.user.name} (${found.role === 'admin' ? 'Administrador' : 'Cliente'}).`
+    );
+
+    if (found.role === 'admin') {
+      setCurrentViewState('admin-products');
+    } else {
+      setCurrentViewState('catalog');
+    }
+    return { success: true, message: 'Acceso exitoso' };
+  };
+
+  const registerUser = (data: { name: string; email: string; phone: string; password: string }): { success: boolean; message: string } => {
+    const exists = userCredentials.some((c) => c.email.toLowerCase() === data.email.trim().toLowerCase());
+    if (exists) {
+      const msg = 'Este correo electrónico ya está registrado. Por favor inicia sesión.';
+      showToast('error', 'Cuenta Existente', msg);
+      return { success: false, message: msg };
+    }
+
+    const newUser: User = {
+      id: `user-client-${Date.now().toString().slice(-4)}`,
+      name: data.name,
+      email: data.email.trim(),
+      role: 'cliente',
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+    };
+
+    const newCred: MockCredential = {
+      email: data.email.trim(),
+      password: data.password,
+      role: 'cliente',
+      user: newUser,
+    };
+
+    setUserCredentials((prev) => [...prev, newCred]);
+    setCurrentUser(newUser);
+    setUserRole('cliente');
+    setCurrentViewState('catalog');
+    showToast('success', 'Registro Exitoso', `¡Bienvenido(a) ${newUser.name}! Tu cuenta ha sido activada.`);
+    return { success: true, message: 'Usuario registrado correctamente' };
+  };
+
   const loginAs = (role: UserRole) => {
-    const user = initialUsers.find((u) => u.role === role) || initialUsers[0];
-    setCurrentUser(user);
+    const cred = userCredentials.find((c) => c.role === role) || userCredentials[0];
+    setCurrentUser(cred.user);
     setUserRole(role);
     showToast(
       'success',
-      'Sesión Iniciada',
-      `Has ingresado con éxito como ${user.name} (${role === 'admin' ? 'Administrador' : 'Cliente'})`
+      'Sesión Iniciada (Demo)',
+      `Has ingresado con éxito como ${cred.user.name} (${role === 'admin' ? 'Administrador' : 'Cliente'})`
     );
     if (role === 'admin') {
-      setCurrentView('admin-products');
+      setCurrentViewState('admin-products');
     } else {
-      setCurrentView('catalog');
+      setCurrentViewState('catalog');
     }
   };
 
   const logout = () => {
     setCurrentUser(null);
-    setCurrentView('login');
-    showToast('info', 'Sesión Cerrada', 'Has salido del sistema de gestión.');
+    setCurrentViewState('login');
+    showToast('info', 'Sesión Finalizada', 'Has cerrado sesión. Para ver el sistema debes volver a autenticarte.');
   };
 
   // Product Navigation
@@ -525,7 +603,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         specDrawerOpen,
         setSpecDrawerOpen,
         currentUser,
+        isAuthenticated,
         userRole,
+        loginWithCredentials,
+        registerUser,
         loginAs,
         logout,
         products,
