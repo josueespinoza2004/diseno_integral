@@ -19,7 +19,7 @@ import { Badge } from '@/components/ui/badge';
 import { ViewType } from '@/types';
 
 export function SpecDrawer() {
-  const { specDrawerOpen, setSpecDrawerOpen, currentView, setCurrentView } = useStore();
+  const { specDrawerOpen, setSpecDrawerOpen, currentView, setCurrentView, userRole, currentUser } = useStore();
   const [selectedSpecKey, setSelectedSpecKey] = useState<string>(currentView);
 
   // Sync with current view when drawer opens
@@ -119,16 +119,39 @@ export function SpecDrawer() {
               <Badge variant="outline" className="text-xs">
                 Rol: {currentSpec.roleRequired}
               </Badge>
-              <button
-                onClick={() => {
-                  setCurrentView(currentSpec.id);
-                  setSpecDrawerOpen(false);
-                }}
-                className="flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800 bg-indigo-50 px-2.5 py-1.5 rounded-lg border border-indigo-100 transition-colors"
-              >
-                <span>Ir a esta pantalla</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </button>
+              {(() => {
+                const isAdminScreen = currentSpec.id === 'admin-products' || currentSpec.id === 'admin-orders';
+                const canAccess = currentUser && (!isAdminScreen || userRole === 'admin');
+
+                if (!currentUser) {
+                  return (
+                    <span className="text-[11px] text-slate-400 font-medium px-2 py-1 bg-slate-100 rounded-lg">
+                      Requiere Iniciar Sesión
+                    </span>
+                  );
+                }
+
+                if (isAdminScreen && userRole !== 'admin') {
+                  return (
+                    <span className="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 font-semibold px-2 py-1 rounded-lg">
+                      🔒 Solo Administrador
+                    </span>
+                  );
+                }
+
+                return (
+                  <button
+                    onClick={() => {
+                      setCurrentView(currentSpec.id);
+                      setSpecDrawerOpen(false);
+                    }}
+                    className="flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800 bg-indigo-50 px-2.5 py-1.5 rounded-lg border border-indigo-100 transition-colors"
+                  >
+                    <span>Ir a esta pantalla</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                );
+              })()}
             </div>
           </div>
 

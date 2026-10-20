@@ -94,22 +94,6 @@ export function LoginView() {
     }
   };
 
-  const handleAutofill = (type: 'cliente' | 'admin') => {
-    if (type === 'cliente') {
-      setEmail('maria.gonzalez@example.com');
-      setPassword('cliente123');
-      setIsRegisterMode(false);
-      setErrors({});
-      showToast('info', 'Datos Cargados', 'Credenciales de Cliente cargadas en el formulario.');
-    } else {
-      setEmail('admin@tienda.com');
-      setPassword('admin123');
-      setIsRegisterMode(false);
-      setErrors({});
-      showToast('info', 'Datos Cargados', 'Credenciales de Administrador cargadas en el formulario.');
-    }
-  };
-
   const handleForgotPasswordSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!resetEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(resetEmail)) {
@@ -179,79 +163,21 @@ export function LoginView() {
             </div>
           </div>
 
-          {/* Burned Accounts / Usuarios Quemados Box */}
+          {/* Security & System Features Box */}
           <div className="mt-8 pt-5 border-t border-slate-700/60 relative z-10 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                <KeyRound className="w-3.5 h-3.5 text-amber-400" />
-                Usuarios Quemados (Evaluación)
-              </span>
-            </div>
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+              <Shield className="w-3.5 h-3.5 text-indigo-400" />
+              Garantía de Seguridad y Privacidad
+            </span>
 
-            {/* Burned Account 1: Cliente */}
-            <div className="p-3 rounded-2xl bg-white/10 border border-white/10 text-xs space-y-1.5 hover:bg-white/15 transition-colors">
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-indigo-300 flex items-center gap-1">
-                  <User className="w-3.5 h-3.5 text-indigo-400" />
-                  Rol Cliente:
-                </span>
-                <button
-                  type="button"
-                  onClick={() => handleAutofill('cliente')}
-                  className="text-[10px] bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-2 py-0.5 rounded-md transition-colors"
-                >
-                  Autollenar
-                </button>
+            <div className="p-3.5 rounded-2xl bg-white/10 border border-white/10 text-xs text-slate-300 space-y-2">
+              <p className="leading-relaxed text-[11px]">
+                Plataforma protegida con autenticación basada en roles (RBAC). El acceso a módulos administrativos está restringido exclusivamente a cuentas autorizadas.
+              </p>
+              <div className="flex items-center gap-2 pt-1 text-[10px] text-slate-400 font-medium">
+                <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                <span>Cifrado de sesión seguro • Control de existencias activo</span>
               </div>
-              <div className="font-mono text-[11px] text-slate-300 select-all">
-                maria.gonzalez@example.com
-              </div>
-              <div className="text-[10px] text-slate-400 flex items-center gap-1">
-                <span>Clave:</span>
-                <span className="font-mono font-bold text-slate-200 bg-black/30 px-1.5 py-0.2 rounded">cliente123</span>
-              </div>
-            </div>
-
-            {/* Burned Account 2: Admin */}
-            <div className="p-3 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-xs space-y-1.5 hover:bg-amber-500/20 transition-colors">
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-amber-300 flex items-center gap-1">
-                  <Shield className="w-3.5 h-3.5 text-amber-400" />
-                  Rol Administrador:
-                </span>
-                <button
-                  type="button"
-                  onClick={() => handleAutofill('admin')}
-                  className="text-[10px] bg-amber-600 hover:bg-amber-500 text-white font-semibold px-2 py-0.5 rounded-md transition-colors"
-                >
-                  Autollenar
-                </button>
-              </div>
-              <div className="font-mono text-[11px] text-slate-300 select-all">
-                admin@tienda.com
-              </div>
-              <div className="text-[10px] text-slate-400 flex items-center gap-1">
-                <span>Clave:</span>
-                <span className="font-mono font-bold text-amber-200 bg-black/30 px-1.5 py-0.2 rounded">admin123</span>
-              </div>
-            </div>
-
-            {/* Quick 1-click access buttons */}
-            <div className="grid grid-cols-2 gap-2 pt-1">
-              <button
-                type="button"
-                onClick={() => loginAs('cliente')}
-                className="py-1.5 px-2 rounded-xl bg-indigo-600/60 hover:bg-indigo-600 text-[11px] font-semibold text-white transition-all text-center"
-              >
-                1 Clic: Cliente
-              </button>
-              <button
-                type="button"
-                onClick={() => loginAs('admin')}
-                className="py-1.5 px-2 rounded-xl bg-amber-600/60 hover:bg-amber-600 text-[11px] font-semibold text-amber-100 transition-all text-center"
-              >
-                1 Clic: Admin
-              </button>
             </div>
           </div>
         </div>

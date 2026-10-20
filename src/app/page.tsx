@@ -19,7 +19,7 @@ import { Sparkles, FileText, Package, Lock, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 function AppContent() {
-  const { currentView, setCurrentView, setSpecDrawerOpen, currentUser } = useStore();
+  const { currentView, setCurrentView, setSpecDrawerOpen, currentUser, userRole } = useStore();
 
   const renderActiveView = () => {
     switch (currentView) {
@@ -36,9 +36,9 @@ function AppContent() {
       case 'order-tracking':
         return <OrderTrackingView />;
       case 'admin-products':
-        return <AdminProductsView />;
+        return userRole === 'admin' ? <AdminProductsView /> : <CatalogView />;
       case 'admin-orders':
-        return <AdminOrdersView />;
+        return userRole === 'admin' ? <AdminOrdersView /> : <CatalogView />;
       default:
         return <CatalogView />;
     }
@@ -50,8 +50,12 @@ function AppContent() {
     { id: 'cart', num: '4', label: 'Carrito' },
     { id: 'checkout', num: '5', label: 'Confirmación' },
     { id: 'order-tracking', num: '6', label: 'Estado de Pedido' },
-    { id: 'admin-products', num: '7', label: 'Admin Productos' },
-    { id: 'admin-orders', num: '8', label: 'Admin Pedidos' },
+    ...(userRole === 'admin'
+      ? [
+          { id: 'admin-products' as ViewType, num: '7', label: 'Admin Productos' },
+          { id: 'admin-orders' as ViewType, num: '8', label: 'Admin Pedidos' },
+        ]
+      : []),
   ];
 
   // SCENARIO 1: Unauthenticated User (Standalone Login Screen)

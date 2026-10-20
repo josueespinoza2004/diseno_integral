@@ -5,7 +5,7 @@ import { Package, ShieldCheck, Heart, Sparkles, FileText, ArrowRight } from 'luc
 import { useStore } from '@/context/StoreContext';
 
 export function Footer() {
-  const { setCurrentView, setSpecDrawerOpen } = useStore();
+  const { setCurrentView, setSpecDrawerOpen, userRole } = useStore();
 
   return (
     <footer className="bg-slate-900 text-slate-400 text-xs border-t border-slate-800 mt-auto">
@@ -94,24 +94,31 @@ export function Footer() {
             <h4 className="text-white text-xs font-bold uppercase tracking-wider">
               Vistas del Administrador
             </h4>
-            <ul className="space-y-1.5">
-              <li>
-                <button
-                  onClick={() => setCurrentView('admin-products')}
-                  className="hover:text-amber-400 transition-colors"
-                >
-                  7. Administración de productos (Alta, precios, stock)
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => setCurrentView('admin-orders')}
-                  className="hover:text-amber-400 transition-colors"
-                >
-                  8. Administración de pedidos y reportes
-                </button>
-              </li>
-            </ul>
+            {userRole === 'admin' ? (
+              <ul className="space-y-1.5">
+                <li>
+                  <button
+                    onClick={() => setCurrentView('admin-products')}
+                    className="hover:text-amber-400 transition-colors"
+                  >
+                    7. Administración de productos (Alta, precios, stock)
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => setCurrentView('admin-orders')}
+                    className="hover:text-amber-400 transition-colors"
+                  >
+                    8. Administración de pedidos y reportes
+                  </button>
+                </li>
+              </ul>
+            ) : (
+              <div className="p-2.5 rounded-xl bg-slate-800/80 border border-slate-700/60 text-[11px] text-slate-400">
+                <span className="text-amber-400 font-semibold block mb-0.5">🔒 Acceso Restringido</span>
+                <span>Las pantallas 7 y 8 requieren iniciar sesión con cuenta de Administrador.</span>
+              </div>
+            )}
 
             <div className="pt-2">
               <span className="text-[11px] text-slate-500 block">Flujo de Estados Auditado:</span>

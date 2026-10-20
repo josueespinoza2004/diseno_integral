@@ -37,8 +37,12 @@ export function Header() {
     { id: 'catalog', label: 'Catálogo', icon: <ShoppingBag className="w-4 h-4" /> },
     { id: 'cart', label: 'Carrito', icon: <ShoppingCart className="w-4 h-4" /> },
     { id: 'order-tracking', label: 'Estado de Pedido', icon: <Truck className="w-4 h-4" /> },
-    { id: 'admin-products', label: 'Admin Productos', icon: <Layers className="w-4 h-4" />, adminOnly: true },
-    { id: 'admin-orders', label: 'Admin Pedidos', icon: <BarChart3 className="w-4 h-4" />, adminOnly: true },
+    ...(userRole === 'admin'
+      ? [
+          { id: 'admin-products' as ViewType, label: 'Admin Productos', icon: <Layers className="w-4 h-4" />, adminOnly: true },
+          { id: 'admin-orders' as ViewType, label: 'Admin Pedidos', icon: <BarChart3 className="w-4 h-4" />, adminOnly: true },
+        ]
+      : []),
   ];
 
   return (
@@ -58,30 +62,19 @@ export function Header() {
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Quick Role Toggle */}
-            <div className="flex items-center bg-slate-800 p-0.5 rounded-lg border border-slate-700">
-              <button
-                onClick={() => loginAs('cliente')}
-                className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium transition-all ${
-                  userRole === 'cliente'
-                    ? 'bg-indigo-600 text-white shadow-xs'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                <UserIcon className="w-3.5 h-3.5" />
-                <span>Cliente</span>
-              </button>
-              <button
-                onClick={() => loginAs('admin')}
-                className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium transition-all ${
-                  userRole === 'admin'
-                    ? 'bg-amber-600 text-white shadow-xs'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                <ShieldCheck className="w-3.5 h-3.5" />
-                <span>Administrador</span>
-              </button>
+            {/* Read-Only Role Indicator Badge (Role cannot be swapped without authenticating) */}
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-800 border border-slate-700 text-xs">
+              {userRole === 'admin' ? (
+                <span className="text-amber-400 font-semibold flex items-center gap-1.5">
+                  <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
+                  Modo Administrador
+                </span>
+              ) : (
+                <span className="text-indigo-300 font-semibold flex items-center gap-1.5">
+                  <UserIcon className="w-3.5 h-3.5 text-indigo-400" />
+                  Modo Cliente
+                </span>
+              )}
             </div>
 
             {/* Spec Sheet Modal Trigger */}
@@ -161,14 +154,17 @@ export function Header() {
               className="text-xs bg-slate-50 border border-slate-300 text-slate-700 rounded-lg px-2.5 py-1.5 font-medium hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               title="Cambiar de Pantalla del Caso"
             >
-              <option value="login">1. Inicio de sesión</option>
               <option value="catalog">2. Catálogo de productos</option>
               <option value="product-detail">3. Detalle del producto</option>
               <option value="cart">4. Carrito de compras</option>
               <option value="checkout">5. Confirmación del pedido</option>
               <option value="order-tracking">6. Consulta del estado del pedido</option>
-              <option value="admin-products">7. Administración de productos</option>
-              <option value="admin-orders">8. Administración de pedidos</option>
+              {userRole === 'admin' && (
+                <>
+                  <option value="admin-products">7. Administración de productos</option>
+                  <option value="admin-orders">8. Administración de pedidos</option>
+                </>
+              )}
             </select>
           </div>
 

@@ -99,7 +99,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const isAuthenticated = currentUser !== null;
 
-  // Protected View Navigation
+  // Protected View Navigation with Role-Based Access Control
   const setCurrentView = (view: ViewType) => {
     if (!currentUser && view !== 'login') {
       showToast(
@@ -110,6 +110,17 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       setCurrentViewState('login');
       return;
     }
+
+    if (userRole !== 'admin' && (view === 'admin-products' || view === 'admin-orders')) {
+      showToast(
+        'error',
+        'Acceso Denegado',
+        'Esta sección requiere privilegios de Administrador. Tu sesión actual es de Cliente.'
+      );
+      setCurrentViewState('catalog');
+      return;
+    }
+
     setCurrentViewState(view);
   };
 
